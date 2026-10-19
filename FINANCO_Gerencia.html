@@ -81,9 +81,10 @@ function copy(t){try{navigator.clipboard.writeText(t).then(function(){toast('Cop
 function fb(t){var a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy');toast('Copiado')}catch(e){}a.remove()}
 
 var CON=Sync.enabled(),KEY='financo_ger_v1';
-var TABS=['leads','tareas','consultas','asociados','pagos','novedades','etapas','resultados','config'];
-var KEYS={asociados:'codigo',config:'clave'};
-var S={},tab='res',pf='rev',loaded=false,err='';
+var TABS=['leads','tareas','consultas','asociados','pagos','novedades','etapas','resultados','config','vendedores','ventas'];
+var KEYS={asociados:'codigo',config:'clave',vendedores:'codigo'};
+var ROLES={vendedor:'Vendedor',jefe:'Jefe de ventas',gerencia:'Gerencia'};
+var S={vendedores:[],ventas:[]},tab='res',pf='rev',loaded=false,err='';
 var CF=[['anticipo','Anticipo (USD)','number'],['cuota','Cuota desde (USD por mes)','number'],['cuotas','Cantidad de cuotas','number'],['entregaDesde','Primeras entregas desde (meses)','number'],['entregaHasta','Primeras entregas hasta (meses)','number'],['minPct','Mínimo de licitación (%)','number','Dejalo vacío hasta que esté confirmado.'],['whatsapp','WhatsApp de ventas','text','Con código de país, sin + ni espacios. Ej: 5492610000000'],['pdf_solo','Enlace al PDF de la carpeta solo FINANCO','text'],['pdf_completa','Enlace al PDF de la carpeta completa','text'],['pdf_condiciones','Enlace al PDF de la hoja de condiciones','text']];
 var LEY=['Render ilustrativo generado con IA','Vista aérea del terreno','Esquema ilustrativo','Foto de obra'];
 function kf(t){return KEYS[t]||'id'}
@@ -107,12 +108,15 @@ function seed(){
  {id:'demo-d1',n:'Lucía M.',tel:'2615550101',canal:'WhatsApp',t:hs(3),p:'alta',e:'nuevo',r:{Modelo:'Dúplex 80 m²',Cuando:'Entre 2 y 3 años',Pago:'Anticipo y cuotas',Conoce:'Sí, ya vio la web'},sig:['Pidió hablar con un asesor','Conoce el anticipo de USD 6.000','Plazo compatible con 24 a 36 meses'],chat:[['bot','Hola, soy el asistente de FINANCO Cooperativa de Vivienda. ¿Te cuento cómo funciona el plan?'],['cli','Sí, vi la web. Quiero saber cuánto es el anticipo'],['bot','El anticipo es de USD 6.000 y las cuotas son desde USD 300 por mes.'],['cli','Quiero hablar con un asesor']]},
  {id:'demo-d2',n:'Julián S.',tel:'2615550104',canal:'Instagram',t:hs(2),p:'media',e:'nuevo',r:{Modelo:'Sin definir',Cuando:'Sin definir',Pago:'Anticipo y cuotas',Conoce:'No'},sig:['Preguntó por el anticipo','Todavía no eligió modelo'],chat:[['bot','Hola, soy el asistente de FINANCO. ¿En qué te puedo ayudar?'],['cli','Cuánto sale entrar?'],['bot','Se entra con un anticipo de USD 6.000 y cuotas desde USD 300 por mes. ¿Querés ver los modelos?'],['cli','Después te aviso']]},
  {id:'demo-d3',n:'Sofía G.',tel:'2615550109',canal:'WhatsApp',t:hs(1),p:'alta',e:'nuevo',r:{Modelo:'Dúplex Carmener',Cuando:'Entre 2 y 3 años',Pago:'Anticipo y cuotas',Conoce:'Sí'},sig:['Pidió turno para visitar','Eligió modelo'],chat:[['bot','Hola Sofía, soy el asistente de FINANCO. ¿Qué modelo te interesa?'],['cli','El Carmener. Quiero ir a ver el terreno'],['bot','Perfecto. Un asesor te contacta para coordinar la visita.']]}];
- var asociados=[{codigo:'DEMO-001',nombre:'Martín R. (ejemplo)',pin:'1234',cuotas_pagas:'8'},{codigo:'DEMO-002',nombre:'Carla P. (ejemplo)',pin:'5678',cuotas_pagas:'2'}];
+ var asociados=[{codigo:'DEMO-001',nombre:'Martín R. (ejemplo)',pin:'1234',cuotas_pagas:'8'},{codigo:'DEMO-002',nombre:'Carla P. (ejemplo)',pin:'5678',cuotas_pagas:'2'},{codigo:'DEMO-003',nombre:'Ejemplo 3',pin:'1003',cuotas_pagas:'1'},{codigo:'DEMO-004',nombre:'Ejemplo 4',pin:'1004',cuotas_pagas:'1'},{codigo:'DEMO-005',nombre:'Ejemplo 5',pin:'1005',cuotas_pagas:'0'},{codigo:'DEMO-006',nombre:'Ejemplo 6',pin:'1006',cuotas_pagas:'0'},{codigo:'DEMO-007',nombre:'Ejemplo 7',pin:'1007',cuotas_pagas:'0'}];
  var pagos=[{id:'demo-p1',codigo:'DEMO-001',fecha:dia(-35),monto:'300',nota:'',estado:'confirmado',concepto:'Cuota 8'},{id:'demo-p2',codigo:'DEMO-001',fecha:dia(-2),monto:'300',nota:'Transferencia',estado:'en revisión',concepto:'informado por el asociado'},{id:'demo-p3',codigo:'DEMO-002',fecha:dia(-1),monto:'300',nota:'Efectivo en la oficina',estado:'en revisión',concepto:'informado por el asociado'}];
  var novedades=[{id:'demo-n1',fecha:dia(0),titulo:'Estado actual del proyecto',texto:'El plan está en etapa de preventa. Los permisos principales están aprobados y el permiso de inicio de obra está en trámite.',imagen:'',leyenda:''},{id:'demo-n2',fecha:dia(-7),titulo:'Delimitación de calles',texto:'Por ahora está marcada la delimitación de calles. Compartiremos nuevo material con cada avance.',imagen:'',leyenda:''}];
  var etapas=[['done','Permisos principales','Aprobados.'],['doing','Permiso de inicio de obra','En trámite.'],['','Primera etapa: servicios','Llevar luz, agua, cloaca y gas hasta la puerta de cada terreno.'],['','Obras de las viviendas','El orden depende de la cantidad de asociados y de las licitaciones.'],['','Primeras entregas','A partir de los 24 meses, hasta 36 (fechas estimadas).']].map(function(r,i){return{id:'demo-e'+(i+1),orden:String(i+1),estado:r[0],titulo:r[1],texto:r[2]}});
+ var vendedores=[{codigo:'demo-V1',nombre:'Sofía (ejemplo)',pin:'1111',rol:'vendedor',equipo:'A'},{codigo:'demo-V2',nombre:'Tomás (ejemplo)',pin:'2222',rol:'vendedor',equipo:'A'},{codigo:'demo-J1',nombre:'Laura, jefa (ejemplo)',pin:'3333',rol:'jefe',equipo:'A'},{codigo:'demo-G1',nombre:'Gerencia (ejemplo)',pin:'4444',rol:'gerencia',equipo:''}];
+ var vt=[['demo-v1','DEMO-001','demo-V1',-1],['demo-v2','DEMO-007','demo-V1',-3],['demo-v3','DEMO-003','demo-V1',-5],['demo-v4','DEMO-004','demo-V1',-8],['demo-v5','DEMO-005','demo-V2',-2],['demo-v6','DEMO-006','demo-V2',-6]];
+ var ventas=vt.map(function(r){return{id:r[0],fecha:dia(r[3]),asociado:r[1],vendedor:r[2],monto:'6000',estado:'confirmada'}});
  var resultados=[{id:'demo-r1',fecha:dia(-30),ofertas:'12 ofertas (ejemplo)',resultado:'Asociado N.º DEMO-001 (ejemplo)'}];
- return{leads:leads,tareas:tareas,consultas:consultas,asociados:asociados,pagos:pagos,novedades:novedades,etapas:etapas,resultados:resultados,config:[]}}
+ return{leads:leads,tareas:tareas,consultas:consultas,asociados:asociados,pagos:pagos,novedades:novedades,etapas:etapas,resultados:resultados,config:[],vendedores:vendedores,ventas:ventas}}
 function save(){if(CON)return;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 function oops(e){toast(e&&e.message==='unauthorized'?'Clave incorrecta':'No se pudo guardar. Reintentá.')}
 function put(t,row){var k=kf(t),a=S[t],i=-1;a.forEach(function(x,j){if(String(x[k])===String(row[k]))i=j});if(i<0)a.push(row);else a[i]=row;save();if(CON){Sync.setStatus('wait');return Sync.upsert(t,[row]).catch(oops)}return Promise.resolve()}
@@ -120,19 +124,20 @@ function del(t,id){var k=kf(t);S[t]=S[t].filter(function(x){return String(x[k])!
 function init(){
  err='';loaded=false;render();
  if(!CON){try{var s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.pagos)S=s}catch(e){}
+  S.vendedores=S.vendedores||[];S.ventas=S.ventas||[];
   if(!S.pagos){S=seed();S.config=cfgdef();save()}
   loaded=true;render();return}
  var rest=TABS.filter(function(t){return t!=='asociados'});
  Sync.list('asociados').then(function(r){S.asociados=r;return Promise.all(rest.map(function(t){return Sync.list(t).then(function(x){S[t]=x},function(){S[t]=[]})}))})
- .then(function(){if(!S.config.length){S.config=cfgdef()}loaded=true;render()})
+ .then(function(){if(!S.config.length){S.config=cfgdef()}S.vendedores=S.vendedores||[];S.ventas=S.ventas||[];loaded=true;render()})
  .catch(function(e){err=e&&e.message==='unauthorized'?'La clave del equipo no es válida.':'No se pudo conectar con la hoja. Revisá la conexión.';render()})}
-function refresh(){if(!CON||!loaded||dlg.open)return;Promise.all(['pagos','asociados','consultas','leads'].map(function(t){return Sync.list(t).then(function(x){S[t]=x})})).then(render).catch(function(){})}
-function T(){return[['res','Resumen'],['pagos','Pagos'],['aso','Asociados'],['nov','Novedades'],['eta','Etapas'],['lic','Licitaciones'],['plan','Plan']]}
+function refresh(){if(!CON||!loaded||dlg.open)return;Promise.all(['pagos','asociados','consultas','leads','ventas'].map(function(t){return Sync.list(t).then(function(x){S[t]=x})})).then(render).catch(function(){})}
+function T(){return[['res','Resumen'],['pagos','Pagos'],['aso','Asociados'],['ven','Ventas'],['nov','Novedades'],['eta','Etapas'],['lic','Licitaciones'],['plan','Plan']]}
 function render(){
  if(err){$('v').innerHTML='<div class="panel"><b>No se pudo cargar</b><p class="s" style="margin:6px 0 14px">'+esc(err)+'</p><button class="btn" data-a="retry">Probar con otra clave</button></div>';return}
  if(!loaded){$('v').innerHTML='<div class="empty">Cargando…</div>';return}
  var h='<div class="chips">'+T().map(function(t){var n=t[0]==='pagos'?S.pagos.filter(function(p){return p.estado==='en revisión'}).length:0;return'<button class="chip" data-a="tab" data-id="'+t[0]+'" aria-pressed="'+(tab===t[0])+'">'+t[1]+(n?' ('+n+')':'')+'</button>'}).join('')+'</div>';
- $('v').innerHTML=h+({res:vRes,pagos:vPagos,aso:vAso,nov:vNov,eta:vEta,lic:vLic,plan:vPlan}[tab])()}
+ $('v').innerHTML=h+({res:vRes,pagos:vPagos,aso:vAso,ven:vVen,nov:vNov,eta:vEta,lic:vLic,plan:vPlan}[tab])()}
 function payRow(p){var st=p.estado==='confirmado'?['p-ok','Confirmado']:(p.estado==='rechazado'?['p-red','No confirmado']:['p-mid','Por confirmar']);
  return'<button class="pr" data-a="pay" data-id="'+esc(p.id)+'"><span class="av">'+esc(ini(nm(p.codigo)))+'</span><span class="m"><b>'+esc(nm(p.codigo))+'</b><span class="s">'+fd(p.fecha)+(p.nota?' · '+esc(p.nota):'')+'</span><span class="row2"><span class="pill '+st[0]+'">'+st[1]+'</span></span></span><span class="a">'+usd(num(p.monto,0))+'</span></button>'}
 function rev(){return S.pagos.filter(function(p){return p.estado==='en revisión'}).sort(function(a,b){return String(a.fecha)<String(b.fecha)?-1:1})}
@@ -171,33 +176,69 @@ function vPlan(){
  +(CON?'<p class="note" style="margin-top:10px">Acceso de prueba para el panel del asociado: código DEMO-001, PIN 1234.</p>':'')+'</div>'
  +(CON?'<h2 class="sec">Sesión</h2><div class="panel"><button class="btn o" data-a="salir">Cambiar la clave del equipo</button></div>':'')}
 /* ---------- diálogos ---------- */
+function vnm(c){var v=S.vendedores.filter(function(x){return String(x.codigo)===String(c)})[0];return v&&v.nombre?v.nombre:String(c||'—')}
+function vends(){return S.vendedores.filter(function(v){return v.rol!=='gerencia'})}
+function ventaDe(c){return S.ventas.filter(function(x){return String(x.asociado)===String(c)&&x.estado!=='anulada'})[0]}
+function advHtml(a){
+ if(!a)return'';var vt=ventaDe(a.codigo);
+ if(vt)return'<p class="note">Adelanto ya registrado con el vendedor '+esc(vnm(vt.vendedor))+'.</p>';
+ if(!vends().length)return'<p class="note">Para registrar el adelanto junto a su vendedor, primero cargá el equipo en la pestaña Ventas.</p>';
+ return'<div class="panel"><label class="chk"><input type="checkbox" id="ad1"> Este pago es el adelanto de ingreso</label><div class="f" style="margin-top:10px"><label for="ad2">Vendedor que lo trajo</label><select id="ad2"><option value="">Elegir…</option>'+vends().map(function(v){return'<option value="'+esc(v.codigo)+'"'+(a.vendedor===v.codigo?' selected':'')+'>'+esc(v.nombre||v.codigo)+'</option>'}).join('')+'</select><div class="hint">Al confirmar se registra la venta y sus comisiones se cargan solas.</div></div></div>'}
+function advOn(){var c=$('ad1');return!!(c&&c.checked)}
+function advSale(p,a){if(!advOn())return false;var v=val('ad2');put('ventas',{id:'v-'+p.id,fecha:String(p.fecha).slice(0,10),asociado:a.codigo,vendedor:v,monto:String(num(p.monto,0)),estado:'confirmada'});a.vendedor=v;return true}
+function vVen(){
+ var ve=S.ventas.slice().sort(function(x,y){return String(y.fecha)<String(x.fecha)?-1:1});
+ return'<div class="bar2"><h2 class="sec">Equipo de ventas</h2><button class="btn sm" data-a="newven">Nuevo integrante</button></div><div class="list two">'
+ +(S.vendedores.length?S.vendedores.map(function(v){var n=S.ventas.filter(function(x){return x.vendedor===v.codigo&&x.estado!=='anulada'}).length;return'<button class="pr" data-a="ven" data-id="'+esc(v.codigo)+'"><span class="av">'+esc(ini(v.nombre))+'</span><span class="m"><b>'+esc(v.nombre||v.codigo)+'</b><span class="s">'+esc(ROLES[v.rol]||'Vendedor')+(v.equipo?' · equipo '+esc(v.equipo):'')+'</span></span><span class="a">'+n+' ventas</span></button>'}).join(''):'<div class="empty panel">Todavía no hay integrantes. Creá vendedores, jefes de venta y gerencia para darles acceso a "Escalas y comisiones".</div>')+'</div>'
+ +'<h2 class="sec" style="margin-top:18px">Ventas registradas</h2><div class="list two">'
+ +(ve.length?ve.map(function(x){return'<button class="pr" data-a="vta" data-id="'+esc(x.id)+'"><span class="m"><b>'+esc(nm(x.asociado))+'</b><span class="s">'+fd(x.fecha)+' · '+esc(vnm(x.vendedor))+(x.estado==='anulada'?' · anulada':'')+'</span></span><span class="a">'+usd(num(x.monto,0))+'</span></button>'}).join(''):'<div class="empty panel">Todavía no hay ventas. Se registran solas cuando confirmás el adelanto de un asociado y elegís su vendedor.</div>')+'</div>'
+ +'<p class="note" style="margin-top:12px">Cada integrante entra a "Escalas y comisiones" con su código y su PIN. Las reglas de cálculo no están en esta pantalla.</p>'}
+function dVen(id){var v=id?S.vendedores.filter(function(x){return x.codigo===id})[0]:null,n=!v;v=v||{codigo:'',nombre:'',pin:pin4(),rol:'vendedor',equipo:''};
+ shell(n?'Nuevo integrante':'Integrante','<div class="f g2"><div><label for="g1">Código</label><input id="g1" value="'+esc(v.codigo)+'"'+(n?' placeholder="Ej: V-01"':' readonly')+'></div><div><label for="g4">Rol</label><select id="g4">'+Object.keys(ROLES).map(function(r){return'<option value="'+r+'"'+(v.rol===r?' selected':'')+'>'+ROLES[r]+'</option>'}).join('')+'</select></div></div><div class="f"><label for="g2">Nombre</label><input id="g2" value="'+esc(v.nombre)+'"></div><div class="f"><label for="g5">Equipo</label><input id="g5" value="'+esc(v.equipo)+'" placeholder="Ej: A"><div class="hint">El jefe de ventas ve a los vendedores de su mismo equipo.</div></div><div class="f"><label for="g3">PIN de acceso</label><input id="g3" inputmode="numeric" value="'+esc(v.pin)+'"><div class="hint">De 4 a 6 números.</div></div><p class="note" id="er" style="color:var(--red)"></p><div class="row2"><button class="btn" id="g6">Guardar</button><button class="btn o" id="g7">Nuevo PIN</button><button class="btn o" id="g8">Copiar datos de acceso</button>'+(n?'':'<button class="btn d" id="g9">Eliminar</button>')+'</div>');
+ $('g7').onclick=function(){$('g3').value=pin4()};
+ $('g8').onclick=function(){copy('Hola '+(val('g2')||'')+'. Tu acceso a "Escalas y comisiones" de FINANCO: código '+val('g1')+', PIN '+val('g3')+'.')};
+ $('g6').onclick=function(){var c=val('g1'),p=val('g3');if(!c||!val('g2'))return bad('Completá el código y el nombre.');if(!/^\d{4,6}$/.test(p))return bad('El PIN debe tener de 4 a 6 números.');if(n&&S.vendedores.some(function(x){return x.codigo===c}))return bad('Ese código ya existe.');
+  put('vendedores',{codigo:c,nombre:val('g2'),pin:p,rol:val('g4'),equipo:val('g5')});closeD();render();toast('Integrante guardado')};
+ if(!n)$('g9').onclick=function(){twice($('g9'),function(){del('vendedores',v.codigo);closeD();render();toast('Integrante eliminado')})}}
+function dVta(id){var x=S.ventas.filter(function(r){return r.id===id})[0];if(!x)return;var an=x.estado==='anulada';
+ shell('Venta','<div class="panel"><b>'+esc(nm(x.asociado))+'</b><p class="s">N.º '+esc(x.asociado)+' · vendedor '+esc(vnm(x.vendedor))+'</p><p class="num" style="font-size:26px;color:var(--forest);margin-top:8px">'+usd(num(x.monto,0))+'</p><p class="s">'+fd(x.fecha)+(an?' · anulada':'')+'</p></div><p class="note">Si el asociado se da de baja antes de lo previsto, anulá la venta y deja de contar para las comisiones.</p><button class="btn '+(an?'':'d')+'" id="g1">'+(an?'Reactivar venta':'Anular venta')+'</button>');
+ $('g1').onclick=function(){x.estado=an?'confirmada':'anulada';put('ventas',x);closeD();render();toast(an?'Venta reactivada':'Venta anulada')}}
+
 function twice(b,fn){if(b.dataset.arm){fn();return}b.dataset.arm='1';var o=b.textContent;b.textContent='Tocá otra vez para confirmar';setTimeout(function(){delete b.dataset.arm;b.textContent=o},3000)}
 function bad(m){var e=$('er');if(e)e.textContent=m}
 function nextPag(a){return'Cuota '+(num(a&&a.cuotas_pagas,0)+1)}
 function dPay(id){var p=S.pagos.filter(function(x){return x.id===id})[0];if(!p)return;var a=aso(p.codigo),ok=p.estado==='confirmado';
  shell(ok?'Pago confirmado':'Confirmar pago','<div class="panel"><b>'+esc(nm(p.codigo))+'</b><p class="s">N.º '+esc(p.codigo)+'</p><p class="num" style="font-size:26px;color:var(--forest);margin-top:8px">'+usd(num(p.monto,0))+'</p><p class="s">'+fd(p.fecha)+(p.nota?' · '+esc(p.nota):'')+'</p></div>'
- +(ok?'<p class="s">Concepto: '+esc(p.concepto)+'</p>':'<div class="f"><label for="g1">Concepto que verá el asociado</label><input id="g1" value="'+esc(nextPag(a))+'"></div><label class="chk"><input type="checkbox" id="g2" checked> Sumar 1 cuota paga al asociado</label><p class="note" id="er" style="color:var(--red)"></p><div class="row2"><button class="btn" id="g3">Confirmar pago</button><button class="btn d" id="g4">No confirmar</button></div><p class="note">Al confirmar, el pago aparece como "Pagada" en el panel del asociado.</p>'));
+ +(ok?'<p class="s">Concepto: '+esc(p.concepto)+'</p>':advHtml(a)+'<div class="f"><label for="g1">Concepto que verá el asociado</label><input id="g1" value="'+esc(nextPag(a))+'"></div><label class="chk"><input type="checkbox" id="g2" checked> Sumar 1 cuota paga al asociado</label><p class="note" id="er" style="color:var(--red)"></p><div class="row2"><button class="btn" id="g3">Confirmar pago</button><button class="btn d" id="g4">No confirmar</button></div><p class="note">Al confirmar, el pago aparece como "Pagada" en el panel del asociado.</p>'));
  if(ok)return;
- $('g3').onclick=function(){p.estado='confirmado';p.concepto=val('g1')||'Pago';put('pagos',p);if($('g2').checked&&a){a.cuotas_pagas=String(num(a.cuotas_pagas,0)+1);put('asociados',a)}closeD();render();toast('Pago confirmado')};
+ if($('ad1'))$('ad1').onchange=function(){if(advOn()){$('g1').value='Adelanto';$('g2').checked=false}else{$('g1').value=nextPag(a);$('g2').checked=true}};
+ $('g3').onclick=function(){if(advOn()&&!val('ad2'))return bad('Elegí el vendedor del adelanto.');
+  var ad=advOn()&&a;p.estado='confirmado';p.concepto=val('g1')||'Pago';put('pagos',p);var tocar=false;
+  if($('g2').checked&&a){a.cuotas_pagas=String(num(a.cuotas_pagas,0)+1);tocar=true}
+  if(ad&&advSale(p,a))tocar=true;
+  if(tocar)put('asociados',a);closeD();render();toast(ad?'Adelanto confirmado y venta registrada':'Pago confirmado')};
  $('g4').onclick=function(){p.estado='rechazado';put('pagos',p);closeD();render();toast('Pago marcado como no confirmado')}}
 function dNewPay(){
  if(!S.asociados.length){toast('Primero creá un asociado');return}
- shell('Registrar pago','<div class="f"><label for="g1">Asociado</label><select id="g1">'+S.asociados.map(function(a){return'<option value="'+esc(a.codigo)+'">'+esc(a.nombre||a.codigo)+' · '+esc(a.codigo)+'</option>'}).join('')+'</select></div><div class="f g2"><div><label for="g2">Fecha</label><input id="g2" type="date" value="'+dia(0)+'"></div><div><label for="g3">Monto (USD)</label><input id="g3" type="number" inputmode="decimal" value="'+esc(cv('cuota')||'300')+'"></div></div><div class="f"><label for="g4">Concepto</label><input id="g4" value="'+esc(nextPag(S.asociados[0]))+'"></div><label class="chk"><input type="checkbox" id="g5" checked> Sumar 1 cuota paga</label><p class="note" id="er" style="color:var(--red)"></p><button class="btn" id="g6">Registrar como confirmado</button>');
- $('g1').onchange=function(){$('g4').value=nextPag(aso($('g1').value))};
- $('g6').onclick=function(){var m=num(val('g3'),0);if(!val('g2')||m<=0)return bad('Completá fecha y monto.');var a=aso($('g1').value);
-  put('pagos',{id:'p'+Date.now(),codigo:a.codigo,fecha:val('g2'),monto:String(m),nota:'cargado por gerencia',estado:'confirmado',concepto:val('g4')||'Pago'});
-  if($('g5').checked){a.cuotas_pagas=String(num(a.cuotas_pagas,0)+1);put('asociados',a)}closeD();tab='pagos';pf='conf';render();toast('Pago registrado')}}
+ shell('Registrar pago','<div class="f"><label for="g1">Asociado</label><select id="g1">'+S.asociados.map(function(a){return'<option value="'+esc(a.codigo)+'">'+esc(a.nombre||a.codigo)+' · '+esc(a.codigo)+'</option>'}).join('')+'</select></div><div id="advbox">'+advHtml(S.asociados[0])+'</div><div class="f g2"><div><label for="g2">Fecha</label><input id="g2" type="date" value="'+dia(0)+'"></div><div><label for="g3">Monto (USD)</label><input id="g3" type="number" inputmode="decimal" value="'+esc(cv('cuota')||'300')+'"></div></div><div class="f"><label for="g4">Concepto</label><input id="g4" value="'+esc(nextPag(S.asociados[0]))+'"></div><label class="chk"><input type="checkbox" id="g5" checked> Sumar 1 cuota paga</label><p class="note" id="er" style="color:var(--red)"></p><button class="btn" id="g6">Registrar como confirmado</button>');
+ function advBind(){if($('ad1'))$('ad1').onchange=function(){if(advOn()){$('g4').value='Adelanto';$('g5').checked=false}else{$('g4').value=nextPag(aso($('g1').value));$('g5').checked=true}}}
+ advBind();
+ $('g1').onchange=function(){$('g4').value=nextPag(aso($('g1').value));$('advbox').innerHTML=advHtml(aso($('g1').value));advBind()};
+ $('g6').onclick=function(){var m=num(val('g3'),0);if(!val('g2')||m<=0)return bad('Completá fecha y monto.');var a=aso($('g1').value);if(advOn()&&!val('ad2'))return bad('Elegí el vendedor del adelanto.');
+  var np={id:'p'+Date.now(),codigo:a.codigo,fecha:val('g2'),monto:String(m),nota:'cargado por gerencia',estado:'confirmado',concepto:val('g4')||'Pago'};put('pagos',np);var tocar=false;
+  if($('g5').checked){a.cuotas_pagas=String(num(a.cuotas_pagas,0)+1);tocar=true}
+  if(advSale(np,a))tocar=true;if(tocar)put('asociados',a);closeD();tab='pagos';pf='conf';render();toast('Pago registrado')}}
 function pin4(){return String(Math.floor(1000+Math.random()*9000))}
 function nextCode(){var m=0;S.asociados.forEach(function(a){if(/^A-/.test(a.codigo)){var n=parseInt(String(a.codigo).replace(/\D/g,''),10);if(n>m)m=n}});return'A-'+('00'+(m+1)).slice(-3)}
 function dAso(id){var a=id?aso(id):null,n=!a;a=a||{codigo:nextCode(),nombre:'',pin:pin4(),cuotas_pagas:'0'};
- shell(n?'Nuevo asociado':'Asociado','<div class="f g2"><div><label for="g1">N.º de asociado</label><input id="g1" value="'+esc(a.codigo)+'"'+(n?'':' readonly')+'></div><div><label for="g4">Cuotas pagas</label><input id="g4" type="number" inputmode="numeric" value="'+num(a.cuotas_pagas,0)+'"></div></div><div class="f"><label for="g2">Nombre</label><input id="g2" value="'+esc(a.nombre)+'"></div><div class="f"><label for="g3">PIN de acceso</label><input id="g3" inputmode="numeric" value="'+esc(a.pin)+'"><div class="hint">De 4 a 6 números. El asociado lo usa con su N.º para entrar a su panel.</div></div><p class="note" id="er" style="color:var(--red)"></p><div class="row2"><button class="btn" id="g5">Guardar</button><button class="btn o" id="g6">Nuevo PIN</button><button class="btn o" id="g7">Copiar datos de acceso</button>'+(n?'':'<button class="btn d" id="g8">Eliminar</button>')+'</div>');
+ shell(n?'Nuevo asociado':'Asociado','<div class="f g2"><div><label for="g1">N.º de asociado</label><input id="g1" value="'+esc(a.codigo)+'"'+(n?'':' readonly')+'></div><div><label for="g4">Cuotas pagas</label><input id="g4" type="number" inputmode="numeric" value="'+num(a.cuotas_pagas,0)+'"></div></div><div class="f"><label for="g2">Nombre</label><input id="g2" value="'+esc(a.nombre)+'"></div><div class="f"><label for="g3">PIN de acceso</label><input id="g3" inputmode="numeric" value="'+esc(a.pin)+'"><div class="hint">De 4 a 6 números. El asociado lo usa con su N.º para entrar a su panel.</div></div>'+(a.vendedor?'<p class="s">Vendedor: '+esc(vnm(a.vendedor))+'</p>':'')+'<p class="note" id="er" style="color:var(--red)"></p><div class="row2"><button class="btn" id="g5">Guardar</button><button class="btn o" id="g6">Nuevo PIN</button><button class="btn o" id="g7">Copiar datos de acceso</button>'+(n?'':'<button class="btn d" id="g8">Eliminar</button>')+'</div>');
  $('g6').onclick=function(){$('g3').value=pin4()};
  $('g7').onclick=function(){copy('Hola '+(val('g2')||'')+'. Tu acceso a "Mi estado de cuenta" de FINANCO: N.º de asociado '+val('g1')+', PIN '+val('g3')+'.')};
  $('g5').onclick=function(){var c=val('g1'),k=parseInt(val('g4'),10),p=val('g3');
   if(!c||!val('g2'))return bad('Completá el N.º y el nombre.');if(!/^\d{4,6}$/.test(p))return bad('El PIN debe tener de 4 a 6 números.');
   if(isNaN(k)||k<0||k>num(cv('cuotas'),180))return bad('Las cuotas pagas deben estar entre 0 y '+num(cv('cuotas'),180)+'.');
   if(n&&aso(c))return bad('Ese N.º ya existe.');
-  put('asociados',{codigo:c,nombre:val('g2'),pin:p,cuotas_pagas:String(k)});closeD();render();toast('Asociado guardado')};
+  put('asociados',{codigo:c,nombre:val('g2'),pin:p,cuotas_pagas:String(k),vendedor:a.vendedor||''});closeD();render();toast('Asociado guardado')};
  if(!n)$('g8').onclick=function(){var b=$('g8');twice(b,function(){del('asociados',a.codigo);closeD();render();toast('Asociado eliminado')})}}
 function dNov(id){var n=id?S.novedades.filter(function(x){return x.id===id})[0]:null,nw=!n;n=n||{id:'n'+Date.now(),fecha:dia(0),titulo:'',texto:'',imagen:'',leyenda:''};
  shell(nw?'Nueva novedad':'Novedad','<div class="f"><label for="g1">Fecha</label><input id="g1" type="date" value="'+esc(String(n.fecha).slice(0,10))+'"></div><div class="f"><label for="g2">Título</label><input id="g2" value="'+esc(n.titulo)+'"></div><div class="f"><label for="g3">Texto</label><textarea id="g3" rows="4">'+esc(n.texto)+'</textarea></div><div class="f"><label for="g4">Enlace a una imagen (opcional)</label><input id="g4" value="'+esc(n.imagen)+'" placeholder="https://…"><div class="hint">Debe ser un enlace público a la imagen.</div></div><div class="f"><label for="g5">Rótulo de la imagen</label><select id="g5"><option value="">Sin imagen</option>'+LEY.map(function(l){return'<option'+(l===n.leyenda?' selected':'')+'>'+l+'</option>'}).join('')+'</select><div class="hint">Toda imagen lleva su rótulo.</div></div><p class="note" id="er" style="color:var(--red)"></p><div class="row2"><button class="btn" id="g6">Publicar</button>'+(nw?'':'<button class="btn d" id="g7">Eliminar</button>')+'</div>');
@@ -232,6 +273,7 @@ function act(a,id,el){
  else if(a==='pf'){pf=id;render()}
  else if(a==='pay')dPay(id);else if(a==='newpay')dNewPay();
  else if(a==='aso')dAso(id);else if(a==='newaso')dAso();
+ else if(a==='ven')dVen(id);else if(a==='newven')dVen();else if(a==='vta')dVta(id);
  else if(a==='nov')dNov(id);else if(a==='newnov')dNov();
  else if(a==='eta')dEta(id);else if(a==='neweta')dEta();
  else if(a==='res')dRes(id);else if(a==='newres')dRes();
