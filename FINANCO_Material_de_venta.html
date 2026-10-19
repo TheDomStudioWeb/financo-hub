@@ -122,7 +122,7 @@ function render(){
  if(tab==='respuestas'){
   h+='<div class="panel">'+FAQ.map(function(f){return'<details class="q"><summary>'+esc(f[0])+'</summary><p>'+esc(f[1])+'</p></details>'}).join('')+'</div>'}
  if(tab==='datos'){
-  h+='<div class="panel"><div class="kv">'+KV.map(function(k){return'<div><span>'+esc(k[0])+'</span><b>'+esc(k[1])+'</b></div>'}).join('')+'</div></div><h2 class="sec">Qué no decir</h2><div class="no"><ul style="margin:0;padding-left:18px"><li>No inventes precios de las viviendas ni porcentajes de licitación: no están confirmados.</li><li>No prometas una fecha de entrega exacta.</li><li>No hables de comisiones ni escalas: están por definirse.</li><li>No presentes un render como foto real.</li></ul></div>'}
+  h+='<div class="panel"><div class="kv">'+KV.map(function(k){return'<div><span>'+esc(k[0])+'</span><b>'+esc(k[1])+'</b></div>'}).join('')+'</div></div><h2 class="sec">Qué no decir</h2><div class="no"><ul style="margin:0;padding-left:18px"><li>No inventes precios de las viviendas ni porcentajes de licitación: no están confirmados.</li><li>No prometas una fecha de entrega exacta.</li><li>No presentes un render como foto real.</li></ul></div>'}
  $('v').innerHTML=h;
  $('v').querySelectorAll('.chip').forEach(function(b){b.onclick=function(){tab=b.dataset.t;render()}});
  $('v').querySelectorAll('[data-i]').forEach(function(b){b.onclick=function(){var g=G[+b.dataset.i];shell(g.t,'<div class="lb" style="position:relative"><img src="'+g.u+'" alt="'+esc(g.t)+'"></div><p class="s"><b>'+esc(g.l)+'</b></p><a class="btn" download="financo_'+g.k+'.jpg" href="'+g.u+'">Descargar imagen</a>')}});
