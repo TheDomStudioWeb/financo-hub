@@ -86,7 +86,7 @@ var KEYS={asociados:'codigo',config:'clave',vendedores:'codigo'};
 var ROLES={vendedor:'Vendedor',jefe:'Jefe de ventas',gerencia:'Gerencia'};
 var S={vendedores:[],ventas:[]},tab='res',pf='rev',loaded=false,err='';
 var CF=[['anticipo','Anticipo (USD)','number'],['cuota','Cuota desde (USD por mes)','number'],['cuotas','Cantidad de cuotas','number'],['entregaDesde','Primeras entregas desde (meses)','number'],['entregaHasta','Primeras entregas hasta (meses)','number'],['minPct','Mínimo de licitación (%)','number','Dejalo vacío hasta que esté confirmado.'],['whatsapp','WhatsApp de ventas','text','Con código de país, sin + ni espacios. Ej: 5492610000000'],['pdf_solo','Enlace al PDF de la carpeta solo FINANCO','text'],['pdf_completa','Enlace al PDF de la carpeta completa','text'],['pdf_condiciones','Enlace al PDF de la hoja de condiciones','text']];
-var LEY=['Render ilustrativo generado con IA','Vista aérea del terreno','Esquema ilustrativo','Foto de obra'];
+var LEY=['Render ilustrativo generado con IA','Toma aérea real del terreno','Esquema ilustrativo','Foto de obra'];
 function kf(t){return KEYS[t]||'id'}
 function dia(d){var x=new Date();x.setDate(x.getDate()+(d||0));return x.toISOString().slice(0,10)}
 function hs(h){return new Date(Date.now()-h*36e5).toISOString()}

@@ -94,8 +94,8 @@ var ETAPAS=[
  ['','Obras de las viviendas','El orden depende de la cantidad de asociados y de las licitaciones.'],
  ['','Primeras entregas','A partir de los 24 meses, hasta 36 (fechas estimadas).']];
 var NOV=[
- {f:'[FECHA]',t:'Estado actual del proyecto',x:'El plan está en etapa de preventa. Los permisos principales están aprobados y el permiso de inicio de obra está en trámite.',i:'b',l:'Vista aérea del terreno'},
- {f:'[FECHA]',t:'Delimitación de calles',x:'Por ahora está marcada la delimitación de calles. Compartiremos nuevo material con cada avance.',i:'a',l:'Vista aérea del terreno'}];
+ {f:'[FECHA]',t:'Estado actual del proyecto',x:'El plan está en etapa de preventa. Los permisos principales están aprobados y el permiso de inicio de obra está en trámite.',i:'b',l:'Toma aérea real del terreno'},
+ {f:'[FECHA]',t:'Delimitación de calles',x:'Por ahora está marcada la delimitación de calles. Compartiremos nuevo material con cada avance.',i:'a',l:'Toma aérea real del terreno'}];
 function draw(){$('v').innerHTML='<div class="hero"><p class="e">Estado de obra</p><h2>Preventa · permisos en marcha</h2><p>Permisos principales aprobados. Permiso de inicio de obra en trámite.</p></div>'
 +'<div class="cols"><div><h2 class="sec">Etapas del proyecto</h2><div class="tl">'+ETAPAS.map(function(e,i){return'<div class="it '+esc(e[0])+'"><span class="dot">'+(e[0]==='done'?'✓':(i+1))+'</span><span><h3>'+esc(e[1])+'</h3><p>'+esc(e[2])+'</p></span></div>'}).join('')+'</div><p class="note">Fechas estimadas, sujetas a permisos, cobro de cuotas y licitaciones.</p></div>'
 +'<div><h2 class="sec">Novedades</h2><div class="list">'+NOV.map(function(n){var src=n.u||IMG[n.i];return'<div class="post">'+(src?'<div class="im"><img src="'+esc(src)+'" alt="'+esc(n.l||'')+'">'+(n.l?'<span class="tag">'+esc(n.l)+'</span>':'')+'</div>':'')+'<div class="bd"><small>'+esc(n.f)+'</small><h3>'+esc(n.t)+'</h3><p>'+esc(n.x)+'</p></div></div>'}).join('')+'</div></div></div>';}
