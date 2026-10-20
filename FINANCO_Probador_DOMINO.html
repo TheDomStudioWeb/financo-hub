@@ -32,6 +32,8 @@ button,input{font-family:inherit;font-size:16px;color:inherit}
 .opts{display:flex;flex-wrap:wrap;gap:8px;align-self:flex-start;max-width:96%}
 .opts button{min-height:44px;padding:0 14px;border:2px solid var(--forest);background:var(--card);color:var(--forest);font-weight:800;font-size:14px;cursor:pointer;border-radius:22px}
 .opts button:active{background:var(--forest);color:#fff}
+.orig{display:flex;gap:8px;align-items:center;padding:8px 12px 0;background:var(--cream);flex:none;font-size:12.5px;font-weight:700;color:var(--muted)}
+.orig select{flex:1;min-width:0;min-height:36px;border:1px solid var(--line);background:var(--card);padding:0 8px;font-size:13px}
 .hints{padding:8px 12px 0;background:var(--cream);display:flex;gap:8px;overflow-x:auto;flex:none}
 .hints button{flex:none;min-height:34px;padding:0 12px;border:1px dashed var(--olive);background:transparent;color:var(--muted);font-size:12.5px;font-weight:700;cursor:pointer;border-radius:17px}
 .hints b{flex:none;align-self:center;font-size:12px;color:var(--muted)}
@@ -64,6 +66,7 @@ form button[disabled],form input[disabled]{opacity:.5}
 <div class="demo">Es una prueba: no se envía nada a FINANCO ni a ningún asesor.</div>
 <div class="wrap">
 <div id="chat" role="log" aria-live="polite" aria-label="Conversación con DOMINO"></div>
+<div class="orig" id="orig"><label for="so">Simular que llegó desde:</label><select id="so"><option value="">Escribió directo al WhatsApp</option><option value="Hola, vi el anuncio de Instagram">Anuncio de Instagram o Facebook</option><option value="Hola, vengo de la web">Botón de la web</option><option value="Hola, escaneé el QR de la carpeta">QR o carpeta de ventas</option></select></div>
 <div class="hints" id="hints"><b>Probá escribir:</b><button type="button">¿cuánto es el anticipo?</button><button type="button">¿cuánto cuesta?</button><button type="button">quiero hablar con un asesor</button><button type="button">¿cuándo entregan?</button></div>
 <form id="f" autocomplete="off"><input id="t" placeholder="Escribí tu respuesta…" aria-label="Escribí tu respuesta" enterkeyhint="send"><button type="submit" aria-label="Enviar">Enviar</button></form>
 <p class="foot">Desarrollado por <a href="https://thedomstudioweb.github.io/">The DOM Studio Web</a> · WhatsApp 261-3431216</p>
@@ -131,6 +134,13 @@ function crear(cfg, opciones = {}) {
       t: t.toISOString(), p, e: cfg.hub.estadoInicial, r: s.resp, sig: s.senales.slice(), chat: s.chat.slice() };
   }
 
+  function origenDe(texto, meta) {
+    if (meta && meta.origen) return String(meta.origen);
+    if (meta && meta.anuncio) return 'Anuncio de Meta';   // los anuncios Click-to-WhatsApp traen el dato de la campaña
+    for (const o of (cfg.origenes || [])) if (has(texto, o.claves)) return o.etiqueta;
+    return (cfg.origenPorDefecto) || 'Directo o sin dato';
+  }
+
   function desvios(s, text, out) {
     // 1) pide hablar con un asesor
     if (!s.pidioAsesor && has(text, cfg.pedirAsesor)) { s.pidioAsesor = true; s.senales.push('Pidió hablar con un asesor'); }
@@ -153,7 +163,11 @@ function crear(cfg, opciones = {}) {
   function handle(sid, texto, meta) {
     const out = [];
     let s = S.get(sid);
-    if (!s) { s = nueva(sid, meta); decir(s, out, cfg.mensajes.saludo); return { replies: out, done: false }; }
+    if (!s) {
+      s = nueva(sid, meta);
+      s.resp.Origen = origenDe(texto, meta); // de dónde llegó: lo trae el canal (meta.origen) o se deduce del primer mensaje del enlace
+      decir(s, out, cfg.mensajes.saludo); return { replies: out, done: false };
+    }
     if (s.cerrada) return { replies: [], done: true };
     s.chat.push(['cli', texto]);
 
@@ -231,7 +245,7 @@ async function enviarAlHub(row, cfg, env = process.env) {
 
 module.exports = { crear };
 return module.exports; })();
-const CFG = {"negocio": "FINANCO Cooperativa de Vivienda Ltda.", "asistente": "DOMINO", "canal": "WhatsApp", "mensajes": {"saludo": "Hola, soy DOMINO, el asistente de FINANCO Cooperativa de Vivienda. Te hago cinco preguntas cortas y un asesor te contacta. ¿Cómo te llamás?", "pideNombre": "¿Cómo te llamás?", "noEntendi": "No te entendí bien. Respondé con el número de la opción.", "derivaDato": "Ese dato lo informa un asesor. Se lo paso a tu consulta.", "cierreAlta": "Gracias, {nombre}. Un asesor te contacta hoy mismo.", "cierreMedia": "Gracias, {nombre}. Un asesor te contacta dentro de las 24 horas.", "cierreBaja": "Gracias, {nombre}. Te dejamos la información disponible y un asesor queda a tu disposición cuando quieras."}, "preguntas": [{"id": "Modelo", "texto": "¿Qué modelo te interesa?", "opciones": [{"etiqueta": "Dúplex 80 m²", "claves": ["80", "dúplex 80"], "puntos": 0}, {"etiqueta": "Dúplex Carmener", "claves": ["carmener"], "puntos": 0}, {"etiqueta": "Todavía no lo sé", "claves": ["no se", "no sé", "todavia", "ninguno"], "puntos": 0}]}, {"id": "Cuando", "texto": "¿Para cuándo pensás mudarte?", "opciones": [{"etiqueta": "Menos de 2 años", "claves": ["menos de 2", "pronto", "ya"], "puntos": 2}, {"etiqueta": "2 a 3 años", "claves": ["2 a 3", "dos a tres", "3 años"], "puntos": 2}, {"etiqueta": "Más de 3 años", "claves": ["mas de 3", "más de 3", "largo"], "puntos": 0}, {"etiqueta": "No lo sé", "claves": ["no se", "no sé"], "puntos": 1}]}, {"id": "Pago", "texto": "¿Cómo pensás pagar?", "opciones": [{"etiqueta": "Anticipo y cuotas", "claves": ["anticipo", "cuotas"], "puntos": 3}, {"etiqueta": "Otra forma", "claves": ["otra", "contado"], "puntos": 1}, {"etiqueta": "No lo sé", "claves": ["no se", "no sé"], "puntos": 1}]}, {"id": "Anticipo", "texto": "¿Con qué anticipo contás? El mínimo es de USD 6.000.", "opciones": [{"etiqueta": "Hasta USD 6.000", "claves": ["6000", "6.000", "minimo", "mínimo", "hasta"], "puntos": 0}, {"etiqueta": "Más de USD 6.000", "claves": ["mas de", "más de", "superior", "mayor"], "puntos": 0, "alta": true, "senal": "Anticipo superior al mínimo"}, {"etiqueta": "Tengo un auto usado para entregar", "claves": ["auto", "usado", "camioneta", "moto", "vehiculo", "vehículo"], "puntos": 0, "alta": true, "senal": "Cuenta con un auto usado para el anticipo", "detalle": {"id": "Vehiculo", "texto": "¿Qué vehículo es? Contame marca, modelo y año para que el asesor lo evalúe."}}, {"etiqueta": "Todavía no lo sé", "claves": ["no se", "no sé", "todavia"], "puntos": 0}]}, {"id": "Conoce", "texto": "¿Conocías FINANCO?", "opciones": [{"etiqueta": "Sí", "claves": ["si", "sí", "conozco"], "puntos": 1}, {"etiqueta": "No", "claves": ["no"], "puntos": 0}]}], "calificacion": {"alta": 5, "media": 3, "pidioAsesor": 3}, "pedirAsesor": ["asesor", "hablar con alguien", "que me llamen", "llamenme", "llámenme", "contacto con una persona"], "hechosConfirmados": [{"claves": ["familias", "cuantas", "cuántas"], "texto": "El plan es para 300 familias."}, {"claves": ["anticipo", "entrada"], "texto": "El anticipo mínimo es de USD 6.000. Se pueden hacer anticipos más altos."}, {"claves": ["cuota", "cuotas", "mensual"], "texto": "La cuota es desde USD 300 por mes, en 180 cuotas (15 años). Se actualiza por el índice de la construcción, con base el 15/10/2026."}, {"claves": ["metros", "m2", "m²", "dormitorio", "baño", "plantas", "superficie"], "texto": "Son dúplex de 2 plantas, 2 dormitorios y 2 baños, de 65 a 80 m² según modelo."}, {"claves": ["entrega", "cuando recibo", "cuándo recibo", "plazo de obra"], "texto": "Las primeras entregas se estiman entre los 24 y 36 meses."}, {"claves": ["permiso", "obra", "estado", "preventa"], "texto": "Hoy está en preventa. Los permisos principales están aprobados y el permiso de inicio de obra está en trámite."}, {"claves": ["licitacion", "licitación", "licitar"], "texto": "La licitación se hace por oferta escrita, en sobre cerrado y ante escribano público. No se deposita dinero al ofertar."}, {"claves": ["servicios", "luz", "agua", "gas", "cloaca"], "texto": "Incluye luz, agua, cloaca y gas hasta la puerta de cada vivienda."}], "temasNoConfirmados": [{"etiqueta": "precio de la vivienda", "claves": ["precio", "valor de la", "cuanto sale", "cuánto sale", "cuanto cuesta", "cuánto cuesta"]}, {"etiqueta": "mínimo de licitación", "claves": ["minimo", "mínimo"]}, {"etiqueta": "inscripción", "claves": ["inscripcion", "inscripción"]}, {"etiqueta": "comisiones", "claves": ["comision", "comisión"]}, {"etiqueta": "dirección o teléfono oficial", "claves": ["direccion", "dirección", "donde queda", "dónde queda", "telefono", "teléfono"]}], "hub": {"tab": "consultas", "estadoInicial": "nuevo"}};
+const CFG = {"negocio": "FINANCO Cooperativa de Vivienda Ltda.", "asistente": "DOMINO", "canal": "WhatsApp", "mensajes": {"saludo": "Hola, soy DOMINO, el asistente de FINANCO Cooperativa de Vivienda. Al seguir, aceptás que guardemos tu nombre y tu teléfono para que un asesor de FINANCO te contacte. Te hago cinco preguntas cortas. ¿Cómo te llamás?", "pideNombre": "¿Cómo te llamás?", "noEntendi": "No te entendí bien. Respondé con el número de la opción.", "derivaDato": "Ese dato lo informa un asesor. Se lo paso a tu consulta.", "cierreAlta": "Gracias, {nombre}. Un asesor te contacta hoy mismo.", "cierreMedia": "Gracias, {nombre}. Un asesor te contacta dentro de las 24 horas.", "cierreBaja": "Gracias, {nombre}. Te dejamos la información disponible y un asesor queda a tu disposición cuando quieras."}, "preguntas": [{"id": "Modelo", "texto": "¿Qué modelo te interesa?", "opciones": [{"etiqueta": "Dúplex 80 m²", "claves": ["80", "dúplex 80"], "puntos": 0}, {"etiqueta": "Dúplex Carmener", "claves": ["carmener"], "puntos": 0}, {"etiqueta": "Todavía no lo sé", "claves": ["no se", "no sé", "todavia", "ninguno"], "puntos": 0}]}, {"id": "Cuando", "texto": "¿Para cuándo pensás mudarte?", "opciones": [{"etiqueta": "Menos de 2 años", "claves": ["menos de 2", "pronto", "ya"], "puntos": 2}, {"etiqueta": "2 a 3 años", "claves": ["2 a 3", "dos a tres", "3 años"], "puntos": 2}, {"etiqueta": "Más de 3 años", "claves": ["mas de 3", "más de 3", "largo"], "puntos": 0}, {"etiqueta": "No lo sé", "claves": ["no se", "no sé"], "puntos": 1}]}, {"id": "Pago", "texto": "¿Cómo pensás pagar?", "opciones": [{"etiqueta": "Anticipo y cuotas", "claves": ["anticipo", "cuotas"], "puntos": 3}, {"etiqueta": "Otra forma", "claves": ["otra", "contado"], "puntos": 1}, {"etiqueta": "No lo sé", "claves": ["no se", "no sé"], "puntos": 1}]}, {"id": "Anticipo", "texto": "¿Con qué anticipo contás? El mínimo es de USD 6.000.", "opciones": [{"etiqueta": "Hasta USD 6.000", "claves": ["6000", "6.000", "minimo", "mínimo", "hasta"], "puntos": 0}, {"etiqueta": "Más de USD 6.000", "claves": ["mas de", "más de", "superior", "mayor"], "puntos": 0, "alta": true, "senal": "Anticipo superior al mínimo"}, {"etiqueta": "Tengo un auto usado para entregar", "claves": ["auto", "usado", "camioneta", "moto", "vehiculo", "vehículo"], "puntos": 0, "alta": true, "senal": "Cuenta con un auto usado para el anticipo", "detalle": {"id": "Vehiculo", "texto": "¿Qué vehículo es? Contame marca, modelo y año para que el asesor lo evalúe."}}, {"etiqueta": "Todavía no lo sé", "claves": ["no se", "no sé", "todavia"], "puntos": 0}]}, {"id": "Conoce", "texto": "¿Conocías FINANCO?", "opciones": [{"etiqueta": "Sí", "claves": ["si", "sí", "conozco"], "puntos": 1}, {"etiqueta": "No", "claves": ["no"], "puntos": 0}]}], "calificacion": {"alta": 5, "media": 3, "pidioAsesor": 3}, "pedirAsesor": ["asesor", "hablar con alguien", "que me llamen", "llamenme", "llámenme", "contacto con una persona"], "hechosConfirmados": [{"claves": ["familias", "cuantas", "cuántas"], "texto": "El plan es para 300 familias."}, {"claves": ["anticipo", "entrada"], "texto": "El anticipo mínimo es de USD 6.000. Se pueden hacer anticipos más altos."}, {"claves": ["cuota", "cuotas", "mensual"], "texto": "La cuota es desde USD 300 por mes, en 180 cuotas (15 años). Se actualiza por el índice de la construcción, con base el 15/10/2026."}, {"claves": ["metros", "m2", "m²", "dormitorio", "baño", "plantas", "superficie"], "texto": "Son dúplex de 2 plantas, 2 dormitorios y 2 baños, de 65 a 80 m² según modelo."}, {"claves": ["entrega", "cuando recibo", "cuándo recibo", "plazo de obra"], "texto": "Las primeras entregas se estiman entre los 24 y 36 meses."}, {"claves": ["permiso", "obra", "estado", "preventa"], "texto": "Hoy está en preventa. Los permisos principales están aprobados y el permiso de inicio de obra está en trámite."}, {"claves": ["licitacion", "licitación", "licitar"], "texto": "La licitación se hace por oferta escrita, en sobre cerrado y ante escribano público. No se deposita dinero al ofertar."}, {"claves": ["servicios", "luz", "agua", "gas", "cloaca"], "texto": "Incluye luz, agua, cloaca y gas hasta la puerta de cada vivienda."}], "temasNoConfirmados": [{"etiqueta": "precio de la vivienda", "claves": ["precio", "valor de la", "cuanto sale", "cuánto sale", "cuanto cuesta", "cuánto cuesta"]}, {"etiqueta": "mínimo de licitación", "claves": ["minimo", "mínimo"]}, {"etiqueta": "inscripción", "claves": ["inscripcion", "inscripción"]}, {"etiqueta": "comisiones", "claves": ["comision", "comisión"]}, {"etiqueta": "dirección o teléfono oficial", "claves": ["direccion", "dirección", "donde queda", "dónde queda", "telefono", "teléfono"]}], "hub": {"tab": "consultas", "estadoInicial": "nuevo"}, "origenes": [{"etiqueta": "Anuncio de Instagram o Facebook", "claves": ["anuncio", "publicidad", "vi el anuncio"]}, {"etiqueta": "Instagram", "claves": ["instagram", "insta"]}, {"etiqueta": "Facebook", "claves": ["facebook"]}, {"etiqueta": "Web de FINANCO", "claves": ["web", "pagina", "sitio"]}, {"etiqueta": "QR o carpeta de ventas", "claves": ["qr", "carpeta", "folleto", "evento", "cartel"]}], "origenPorDefecto": "Directo o sin dato"};
 
 const $ = id => document.getElementById(id);
 const chat = $('chat'), inp = $('t');
@@ -263,7 +277,7 @@ async function send(text, label){
   busy = true; clearOpts(); bubble(label || text, 'me'); inp.value=''; $('f').querySelectorAll('input,button').forEach(e=>e.disabled=true);
   const r = bot.handle('prueba', text);
   await show(r.replies);
-  if (r.done){ fin = true; ficha(r.row); $('hints').style.display='none'; $('f').style.display='none'; }
+  if (r.done){ fin = true; ficha(r.row); $('hints').style.display='none'; $('orig').style.display='none'; $('f').style.display='none'; }
   busy = false; if (!fin){ $('f').querySelectorAll('input,button').forEach(e=>e.disabled=false); if (matchMedia('(pointer:fine)').matches) inp.focus(); }
 }
 function ficha(row){
@@ -271,7 +285,7 @@ function ficha(row){
   const nivel = {alta:'Alta',media:'Media',baja:'Baja'}[row.p];
   const llamar = {alta:'Llama el mismo día',media:'Contacta dentro de las 24 horas',baja:'Se le deja la información y queda a disposición'}[row.p];
   const claves = Object.keys(row.r);
-  const lab = k => ({Modelo:'Modelo',Cuando:'Cuándo quiere mudarse',Pago:'Forma de pago',Anticipo:'Anticipo disponible',Vehiculo:'Vehículo a entregar',Conoce:'Conoce FINANCO'})[k]||k;
+  const lab = k => ({Modelo:'Modelo',Cuando:'Cuándo quiere mudarse',Pago:'Forma de pago',Anticipo:'Anticipo disponible',Vehiculo:'Vehículo a entregar',Conoce:'Conoce FINANCO',Origen:'Llegó desde'})[k]||k;
   let why = 'Puntos: '+s.puntos+' (Alta desde '+CFG.calificacion.alta+', Media desde '+CFG.calificacion.media+').';
   if (s.pidioAsesor) why = 'Quedó en Alta porque pidió hablar con un asesor.';
   else if (s.forzaAlta) why = 'Quedó en Alta directa por el anticipo ofrecido (más de USD 6.000 o auto usado), sin importar los puntos ('+s.puntos+').';
@@ -285,14 +299,14 @@ function ficha(row){
   chat.appendChild(d); bottom(); $('again').onclick=start;
 }
 async function start(){
-  chat.innerHTML=''; fin=false; busy=true; $('hints').style.display=''; $('f').style.display='';
+  chat.innerHTML=''; fin=false; busy=true; $('hints').style.display=''; $('orig').style.display=''; $('f').style.display='';
   $('f').querySelectorAll('input,button').forEach(e=>e.disabled=true);
   bot = DOMINO.crear(CFG);
-  const r = bot.handle('prueba','',{tel:'2610000000'});
+  const r = bot.handle('prueba', $('so').value, {tel:'2610000000'});
   await show(r.replies); busy=false; $('f').querySelectorAll('input,button').forEach(e=>e.disabled=false);
 }
 $('f').onsubmit = e => { e.preventDefault(); send(inp.value); };
-$('reset').onclick = start;
+$('reset').onclick = start; $('so').onchange = start;
 $('hints').querySelectorAll('button').forEach(b=>b.onclick=()=>send(b.textContent));
 start();
 </script></body></html>
