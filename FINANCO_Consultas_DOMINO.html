@@ -93,7 +93,7 @@ function seed(){
 function load(){try{var x=JSON.parse(localStorage.getItem(KEY)||'null');if(x)return x}catch(e){}return null}
 var SNAP={};
 function save(){try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}Sync.diff('consultas',D,SNAP)}
-function normC(c){if(!c.r||typeof c.r!=='object')c.r={};if(!Array.isArray(c.sig))c.sig=[];if(!Array.isArray(c.chat))c.chat=[];c.r.Modelo=c.r.Modelo||'Sin definir';c.r.Cuando=c.r.Cuando||'Sin definir';c.r.Pago=c.r.Pago||'Sin definir';c.r.Conoce=c.r.Conoce||'Sin definir';c.p=c.p||'media';c.e=c.e||'nuevo';return c}
+function normC(c){if(!c.r||typeof c.r!=='object')c.r={};if(!Array.isArray(c.sig))c.sig=[];if(!Array.isArray(c.chat))c.chat=[];c.r.Modelo=c.r.Modelo||'Sin definir';c.r.Cuando=c.r.Cuando||'Sin definir';c.r.Pago=c.r.Pago||'Sin definir';c.r.Anticipo=c.r.Anticipo||'Sin definir';c.r.Conoce=c.r.Conoce||'Sin definir';c.p=c.p||'media';c.e=c.e||'nuevo';return c}
 if(Sync.enabled()){D=[];Sync.list('consultas').then(function(rows){D=rows.map(normC);SNAP=Sync.snap(D);render()}).catch(function(){D=load()||[];render()})}else{D=load()||seed()}
 function ago(iso){var h=(Date.now()-new Date(iso))/36e5;if(h<1)return'hace minutos';if(h<24)return'hace '+Math.floor(h)+' h';var d=Math.floor(h/24);return'hace '+d+(d===1?' día':' días')}
 function ini(n){var p=n.split(/\s+/);return(p[0][0]+(p[1]?p[1][0]:'')).toUpperCase()}
@@ -111,10 +111,10 @@ function render(){
  $('v').querySelectorAll('.chip').forEach(function(b){b.onclick=function(){flt=b.dataset.f;render()}});
  $('q').oninput=function(){q=this.value.toLowerCase();var p=this.selectionStart;render();var e=$('q');e.focus();e.setSelectionRange(p,p)}}
 function find(id){return D.filter(function(c){return c.id===id})[0]}
-function ficha(c){return'Consulta DOMINO\nNombre: '+c.n+'\nTeléfono: '+c.tel+'\nCanal: '+c.canal+'\nModelo: '+c.r.Modelo+'\nCuándo: '+c.r.Cuando+'\nForma de pago: '+c.r.Pago+'\nCalificación: '+PL[c.p][0]}
+function ficha(c){return'Consulta DOMINO\nNombre: '+c.n+'\nTeléfono: '+c.tel+'\nCanal: '+c.canal+'\nModelo: '+c.r.Modelo+'\nCuándo: '+c.r.Cuando+'\nForma de pago: '+c.r.Pago+'\nAnticipo: '+c.r.Anticipo+'\nCalificación: '+PL[c.p][0]}
 function open_(id){var c=find(id);
  var b='<div class="row2" style="margin:0"><span class="pill '+PL[c.p][1]+'">Calificación '+PL[c.p][0]+'</span><span class="pill '+ES[c.e][1]+'">'+ES[c.e][0]+'</span><span class="s">'+esc(c.canal)+' · '+ago(c.t)+'</span></div>'
- +'<div><h2 class="sec" style="margin:0 0 8px">Respuestas</h2><div class="ans">'+Object.keys(c.r).map(function(k){return'<div><small>'+esc(k.replace('Cuando','Cuándo quiere mudarse').replace('Pago','Forma de pago').replace('Conoce','Conoce FINANCO'))+'</small><b>'+esc(c.r[k])+'</b></div>'}).join('')+'</div></div>'
+ +'<div><h2 class="sec" style="margin:0 0 8px">Respuestas</h2><div class="ans">'+Object.keys(c.r).map(function(k){return'<div><small>'+esc(k.replace('Cuando','Cuándo quiere mudarse').replace('Pago','Forma de pago').replace('Anticipo','Anticipo disponible').replace('Conoce','Conoce FINANCO'))+'</small><b>'+esc(c.r[k])+'</b></div>'}).join('')+'</div></div>'
  +'<div><h2 class="sec" style="margin:0 0 8px">Por qué esta calificación</h2><div class="sig">'+c.sig.map(function(s){return'<span>'+esc(s)+'</span>'}).join('')+'</div></div>'
  +'<div><h2 class="sec" style="margin:0 0 8px">Conversación</h2>'+c.chat.map(function(m){return'<div class="bub '+m[0]+'"><small>'+(m[0]==='bot'?'DOMINO':esc(c.n))+'</small>'+esc(m[1])+'</div>'}).join('')+'</div>'
  +'<a class="btn" href="https://wa.me/549'+c.tel.replace(/\D/g,'')+'" target="_blank" rel="noopener">Abrir WhatsApp</a>'
