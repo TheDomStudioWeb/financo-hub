@@ -91,13 +91,13 @@ var PDF={solo:"",completa:"",condiciones:""};
 Sync.config().then(function(c){if(c.pdf_solo)PDF.solo=c.pdf_solo;if(c.pdf_completa)PDF.completa=c.pdf_completa;if(c.pdf_condiciones)PDF.condiciones=c.pdf_condiciones;render()});
 var MSG=[
 ['Primer contacto','Hola {nombre}, te escribo de FINANCO Cooperativa de Vivienda. Recibimos tu consulta sobre el plan de vivienda. ¿Te cuento cómo funciona?'],
-['Cómo funciona el plan','{nombre}, el plan funciona así: te asociás con un anticipo de USD 6.000 y pagás cuotas desde USD 300 por mes, en dólares. Las cuotas se actualizan por el índice de la construcción (base 15/10/2026). El orden de obra depende de la cantidad de asociados y de las licitaciones. ¿Querés que te mande los modelos?'],
+['Cómo funciona el plan','{nombre}, el plan funciona así: te asociás con un anticipo mínimo de USD 6.000 y pagás cuotas desde USD 300 por mes, en dólares. Las cuotas se actualizan por el índice de la construcción (base 15/10/2026). El orden de obra depende de la cantidad de asociados y de las licitaciones. ¿Querés que te mande los modelos?'],
 ['Envío de modelos','Te comparto los dos modelos de dúplex: Dúplex 80 m² y Dúplex Carmener. Son de 2 plantas, 2 dormitorios y 2 baños, de 65 a 80 m² según modelo. Las imágenes son renders ilustrativos generados con IA a partir del proyecto.'],
 ['Seguimiento','Hola {nombre}, ¿pudiste ver la información que te pasé? Si querés, coordinamos una llamada o una visita para resolver tus dudas.'],
 ['Invitación a visita','{nombre}, ¿te parece que coordinemos una visita para conocer el terreno? Tengo lugar el [FECHA] a las [HORA].'],
 ['Entregas','Las primeras entregas se estiman a partir de los 24 meses, hasta 36, sujetas a permisos, cobro de cuotas y licitaciones. Son fechas estimadas.']];
 var FAQ=[
-['¿Cuánto es el anticipo y la cuota?','Anticipo de USD 6.000 y cuota desde USD 300 por mes, durante 180 cuotas. Todo en dólares.'],
+['¿Cuánto es el anticipo y la cuota?','Anticipo mínimo de USD 6.000 y cuota desde USD 300 por mes, durante 180 cuotas. Todo en dólares.'],
 ['¿Se actualizan las cuotas?','Sí, por el índice de la construcción, con base el 15/10/2026. Si ese criterio cambia, se corrige en el material.'],
 ['¿Qué incluye el precio?','Terreno, obra e infraestructura.'],
 ['¿Cuándo me entregan?','Las primeras entregas se estiman a partir de los 24 meses, hasta 36. Dependen de permisos, cobro de cuotas y licitaciones. No prometas una fecha exacta.'],
@@ -106,7 +106,7 @@ var FAQ=[
 ['¿Puedo retirarme o ceder mi lugar?','Sí. Las condiciones figuran en el estatuto y en la Ley de Cooperativas 20.337.'],
 ['¿Las imágenes son reales?','Son renders ilustrativos generados con IA a partir del proyecto real. Cada imagen lo indica.'],
 ['¿En qué estado está el proyecto?','Preventa. Permisos principales aprobados; el permiso de inicio de obra está en trámite.']];
-var KV=[['Familias del plan','300'],['Modelos','Dúplex 80 m² y Dúplex Carmener'],['Superficie','65 a 80 m² según modelo'],['Distribución','2 plantas, 2 dormitorios, 2 baños'],['Edificio','4 dúplex por edificio'],['Anticipo','USD 6.000'],['Cuota','Desde USD 300 por mes'],['Cantidad de cuotas','180'],['Servicios','Luz, agua, cloaca y gas hasta la puerta de cada vivienda'],['Primeras entregas','Desde 24 meses, hasta 36'],['Estado','Preventa']];
+var KV=[['Familias del plan','300'],['Modelos','Dúplex 80 m² y Dúplex Carmener'],['Superficie','65 a 80 m² según modelo'],['Distribución','2 plantas, 2 dormitorios, 2 baños'],['Edificio','4 dúplex por edificio'],['Anticipo mínimo','USD 6.000'],['Cuota','Desde USD 300 por mes'],['Cantidad de cuotas','180'],['Servicios','Luz, agua, cloaca y gas hasta la puerta de cada vivienda'],['Primeras entregas','Desde 24 meses, hasta 36'],['Estado','Preventa']];
 var tab='carpetas';
 function nm(t){return t.replace(/\{nombre\}/g,'[Nombre]')}
 function render(){

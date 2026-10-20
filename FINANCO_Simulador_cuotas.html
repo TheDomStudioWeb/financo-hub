@@ -77,11 +77,11 @@ input:focus-visible{outline:2px solid var(--forest);outline-offset:1px}
 <main>
 <section class="card hero"><p class="eyebrow">Tu plan, a valores de hoy</p>
 <p class="big num"><small>desde USD</small><span id="cuota"></span></p><p class="sub">por mes, durante <b id="ncuo"></b> cuotas</p>
-<div class="pair"><div><span>ANTICIPO</span><b class="num" id="ant"></b></div><div><span>APORTE TOTAL DE REFERENCIA</span><b class="num" id="tot"></b></div></div></section>
+<div class="pair"><div><span>ANTICIPO MÍNIMO</span><b class="num" id="ant"></b></div><div><span>APORTE TOTAL DE REFERENCIA</span><b class="num" id="tot"></b></div></div></section>
 
 <section class="card"><p class="eyebrow">¿De dónde sale el aporte?</p><h2>Anticipo y cuotas</h2>
 <div class="donutwrap"><div class="donut"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="48" fill="none" stroke="#E4EBD6" stroke-width="20"/><circle id="dA" cx="60" cy="60" r="48" fill="none" stroke="#A9B98D" stroke-width="20"/><circle id="dC" cx="60" cy="60" r="48" fill="none" stroke="#14391F" stroke-width="20"/></svg><div class="c"><b class="num" id="dTot"></b><span>aporte total</span></div></div>
-<div class="leg"><div><i style="background:#A9B98D"></i>Anticipo<b id="lA"></b></div><div><i style="background:#14391F"></i>Cuotas mensuales<b id="lC"></b></div></div></div></section>
+<div class="leg"><div><i style="background:#A9B98D"></i>Anticipo mínimo<b id="lA"></b></div><div><i style="background:#14391F"></i>Cuotas mensuales<b id="lC"></b></div></div></div></section>
 
 <section class="card full"><p class="eyebrow">Mes a mes</p><h2>¿Cuánto habrás aportado?</h2>
 <svg class="chart" id="chart" viewBox="0 0 340 170" role="img" aria-label="Gráfico de aportes acumulados por mes"></svg>
@@ -157,7 +157,7 @@ function calc(){
  var pv=num($('pv').value),pl=num($('pl').value),h='';
  if(pv){
   h+='<div class="row"><span>Valor de la vivienda</span><b>'+usd(pv)+'</b></div>';
-  h+='<div class="row"><span>Anticipo + 180 cuotas (valores de hoy)</span><b>'+usd(total)+'</b></div>';
+  h+='<div class="row"><span>Anticipo mínimo + 180 cuotas (valores de hoy)</span><b>'+usd(total)+'</b></div>';
   var dif=pv-total;
   h+='<div class="row t"><span>'+(dif>0?'Diferencia a cubrir con licitación y otros aportes':'Tus aportes superan el valor cargado')+'</span><b>'+usd(Math.abs(dif))+'</b></div>';
   if(pl){var lic=pv*pl/100;h+='<div class="row"><span>Licitación mínima ('+nf.format(pl)+'%)</span><b>'+usd(lic)+'</b></div>'}
@@ -167,7 +167,7 @@ function calc(){
 }
 function pes(){
  var tc=num($('tc').value),h='';
- if(tc){h+='<div class="row"><span>Cuota mensual</span><b>$ '+nf.format(PLAN.cuota*tc)+'</b></div><div class="row"><span>Anticipo</span><b>$ '+nf.format(PLAN.anticipo*tc)+'</b></div><p class="note">Cálculo con $ '+nf.format(tc)+' por dólar. Las cuotas se actualizan por índice de la construcción, no por tipo de cambio.</p>'}
+ if(tc){h+='<div class="row"><span>Cuota mensual</span><b>$ '+nf.format(PLAN.cuota*tc)+'</b></div><div class="row"><span>Anticipo mínimo</span><b>$ '+nf.format(PLAN.anticipo*tc)+'</b></div><p class="note">Cálculo con $ '+nf.format(tc)+' por dólar. Las cuotas se actualizan por índice de la construcción, no por tipo de cambio.</p>'}
  else h='<p class="note">Cargá el tipo de cambio para ver el equivalente.</p>';
  $('pes').innerHTML=h;save();
 }

@@ -86,7 +86,7 @@ function render(){
  var T=[['d80','Dúplex 80 m²'],['car','Dúplex Carmener'],['ter','Terreno']];
  var h='<div class="chips">'+T.map(function(t){return'<button class="chip" data-t="'+t[0]+'" aria-pressed="'+(tab===t[0])+'">'+t[1]+'</button>'}).join('')+'</div>';
  var I=INFO[tab];
- h+='<div class="hero"><div class="e">Modelos de vivienda</div><h2>'+esc(I.n)+'</h2><p>Plan para 300 familias. Anticipo de USD 6.000, cuota desde USD 300 por mes en 180 cuotas. Hoy en preventa.</p></div>';
+ h+='<div class="hero"><div class="e">Modelos de vivienda</div><h2>'+esc(I.n)+'</h2><p>Plan para 300 familias. Anticipo mínimo de USD 6.000, cuota desde USD 300 por mes en 180 cuotas. Hoy en preventa.</p></div>';
  if(I.kv.length)h+='<div class="panel" style="margin-top:14px"><dl class="kv">'+I.kv.map(function(r){return'<dt>'+esc(r[0])+'</dt><dd>'+esc(r[1])+'</dd>'}).join('')+'</dl></div>';
  var gs=G.filter(function(g){return g.m===tab});
  h+='<h2 class="sec">Imágenes</h2><div class="grid">'+gs.map(function(g){return'<button class="ph'+(g.fit?' fit':'')+'" data-k="'+g.k+'"><img src="'+g.u+'" alt="'+esc(g.t)+'"><span><b>'+esc(g.t)+'</b>'+esc(g.l)+'</span></button>'}).join('')+'</div>';
