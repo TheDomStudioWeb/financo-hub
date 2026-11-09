@@ -28,3 +28,9 @@ Ojo: si una persona con PIN de 5 o 6 escribe sin tocar ese enlace, al cuarto nú
 Componente `financo-pin.js` (sin librerías), compartido como `financo-sync.js`. Referencia de estilo: video "OTP Verification v3" guardado por Daniel.
 
 **Para responder por voz:** "¿Por qué giran los números?" → Es el sistema verificando el PIN; cuando termina se pone verde si está bien o rojo si está mal.
+
+## Ingreso "líquido" + PIN con órbita (09/11/2026)
+- La pantalla arranca con un solo botón verde (**Ingresar a mi cuenta** en Mi estado de cuenta, **Ingresar** en Escalas y comisiones).
+- Al tocarlo se divide como un líquido: arriba queda el campo **Número de asociado** (o **Tu código**) y abajo las **casillas del PIN**.
+- Se escribe el número, se toca Enter y se escribe el PIN: al cuarto número las casillas giran en órbita como antes y, si está bien, se cierran en el anillo verde y se abre la cuenta.
+- Componente `dom-login.js` (el mismo de las apps DOMino y del Hub X5) combinado con `financo-pin.js`.
